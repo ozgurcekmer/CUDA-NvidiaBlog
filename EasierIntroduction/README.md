@@ -1,5 +1,7 @@
 # An Even Easier Introduction to CUDA
 - The related NVIDIA blog is [here](https://developer.nvidia.com/blog/even-easier-introduction-cuda/).
+- A case with a vector addition was investigated to demonstrate an easy implementation of CUDA to port the compute-intensive part of the code on NVIDIA GPUs. 
+- The vector size here is ~17M.
 - An object-oriented approach has been implemented within the CUDA/C++ code.
 - A personal laptop with NVIDIA GeForce RTX 2070 with Max-Q Design is used for the simulations.
 
@@ -17,7 +19,14 @@
 | CUDA (16384, 1024) | 1.72 | 117.40
 
 * \* 1152 is the number of SMs in my GPU times 32
-
+- This performance table is a nice demonstration of the "using thousands of chickens instead of a very powerful oxen" metaphore.
+- Runtime reduces with increased number of CUDA threads.
+- CPU solver is serial.
 ## Roofline analysis:
 
 <img src="images/Roofline.png" alt="Roofline" width="600"/>
+
+- Here, the legend "current" is for the case with 1152 thread blocks each has 256 threads.
+- Our kernel is memory-bound.
+## To do list
+- Add an OpenMP solver for an improved CPU performance: use the entire resources of a single node (CPU cores).
