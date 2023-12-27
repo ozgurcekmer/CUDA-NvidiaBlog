@@ -30,3 +30,4 @@
 - Our kernel is memory-bound.
 ## To do list
 - Add an OpenMP solver for an improved CPU performance: use the entire resources of a single node (CPU cores).
+- Add a CMake file for the code portability
