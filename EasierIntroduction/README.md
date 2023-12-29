@@ -33,3 +33,6 @@
 ## To do list
 - Add an OpenMP solver for an improved CPU performance: use the entire resources of a single node (CPU cores).
 - Add a CMake file for the code portability
+- Add cases with launch configuration targeting maximum occupancy (2048 x 36)
+    - 2048: maximum threads that a single SM can handle
+    - 36: Number of SMs in my machine
