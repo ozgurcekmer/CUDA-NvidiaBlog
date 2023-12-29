@@ -4,21 +4,23 @@
 - The vector size here is ~17M.
 - An object-oriented approach has been implemented within the CUDA/C++ code.
 - A personal laptop with NVIDIA GeForce RTX 2070 with Max-Q Design is used for the simulations.
+- ***Nsight-Compute*** has been used for the performance analysis.
 
 ## Runtimes:
 - The performance results are as follows:
 
 | Solver | Kernel Runtime (ms) | Bandwidth (GB/s) |
 | --- | --- | --- |
-| CPU | 164.75 | N/A 
+| CPU* | 164.75 | N/A 
 | CUDA (1, 1) | 8341.16 | N/A
 | CUDA (256, 1) | 111.94 | 2.42
 | CUDA (256, 256) | 1.16 | 171.64
-| CUDA (1152, 256)* | 1.06 | 188.56 
-| CUDA (1152, 1024)* | 1.10 | 182.18
+| CUDA (1152, 256)** | 1.06 | 188.56 
+| CUDA (1152, 1024)** | 1.10 | 182.18
 | CUDA (16384, 1024) | 1.72 | 117.40
 
-* \* 1152 is the number of SMs in my GPU times 32
+* \*Comparing CPU and GPU results is not very healthy in this example, since the time consumed during the data transfer between CPU and GPU are not included to the runtimes.
+* \** 1152 is the number of SMs in my GPU times 32
 - This performance table is a nice demonstration of the "using thousands of chickens instead of a very powerful oxen" metaphore.
 - Runtime reduces with increased number of CUDA threads.
 - CPU solver is serial.
