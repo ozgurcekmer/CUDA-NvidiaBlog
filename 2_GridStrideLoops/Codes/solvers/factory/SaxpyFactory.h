@@ -5,6 +5,7 @@
 
 #include "../interface/ISaxpy.h"
 #include "../include/CpuSaxpy.h"
+#include "../include/GpuGridStride.h"
 #include "../include/GpuSaxpy.h"
 
 template <typename T>
@@ -26,9 +27,13 @@ public:
 		{
 			solverSelect = std::make_shared<CpuSaxpy<T>>(x, y);
 		}
-		else if (solverType == "gpu")
+		else if (solverType == "gpuCommon")
 		{
 			solverSelect = std::make_shared<GpuSaxpy<T>>(x, y);
+		}
+		else if (solverType == "gpuGridStride")
+		{
+			solverSelect = std::make_shared<GpuGridStride<T>>(x, y);
 		}
 		return solverSelect;
 	}

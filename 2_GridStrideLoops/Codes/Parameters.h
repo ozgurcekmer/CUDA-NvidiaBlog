@@ -11,21 +11,24 @@
 typedef float Real;
 //static const Real A = 2.0;
 
-static const int N = 1<<24; //(17 M)
+static const int N = 1<<26 ; //(17 M)
 
-static const size_t BLOCK_SIZE = 256;
-static const size_t GRID_SIZE = 256;
-//static const size_t GRID_SIZE = N / BLOCK_SIZE;
+static const int BLOCK_SIZE = 1024;
+//static const size_t GRID_SIZE = 256;
+static const int GRID_SIZE = N / BLOCK_SIZE;
 
 // Solver selection
-static const std::string refSolverName = "cpu";
-static const std::string testSolverName = "gpu";
+static const std::string refSolverName = "gpuCommon";
+static const std::string testSolverName = "gpuGridStride";
 
 /*
     SOLVERS:
+    CPU Solvers:
     - cpu 
-    - gpu
 
+    GPU Solvers:
+    - gpuCommon
+    - gpuGridStride
 
     WARNING: All GPU solvers need to have the letters "gpu"
     (in this order & lower case) in their names

@@ -9,11 +9,10 @@ __global__
 void saxpyKernel(T* x, T* y, T A, const int N) 
 {
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-    
-    for (int i = idx; i < N; i += stride)
+        
+    if (idx < N)
     {
-        y[i] += A * x[i];
+        y[idx] += A * x[idx];
     }
 
 }
@@ -54,9 +53,10 @@ GpuSaxpy<T>::~GpuSaxpy()
 template <typename T>
 void GpuSaxpy<T>::saxpy()
 {
+    gpuReportDevice();
     deviceAllocations();
     copyH2D();
- 
+
     cout << "Block size: " << BLOCK_SIZE << endl;
     cout << "Grid size : " << GRID_SIZE << endl;
 
