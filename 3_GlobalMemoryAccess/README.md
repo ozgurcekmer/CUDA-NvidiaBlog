@@ -54,7 +54,7 @@ void stride (T* a, int s)
 ```
 
 ### Misaligned Access
-- Arrays allocated in device memory are aligned to ***256-byte memory segments (BANKS???)*** by the CUDA driver
+- Arrays allocated in device memory are aligned to ***256-byte memory segments*** by the CUDA driver
 - The device can access global memory via 32-, 64-, or 128-byte transactions that are aligned to their size
 - Devices of compute capability 2.0 (e.g. Tesla C2050) have an L1 cache in each multiprocessor with a 128-byte line size
     - The device coalesces accesses by threads in a warp into as few cache lines as possible, resulting in negligible effect of alignment on throughput for sequential memory accesses across threads 
@@ -68,8 +68,3 @@ void stride (T* a, int s)
 
 
 
-## Terminology
-- **Kernel:** A function executed on the device
-- **SIMD:** **S**ingle **I**nstruction **M**ultiple **D**ata
-- ***Cache line:*** ???
-- ***BANK:*** ???

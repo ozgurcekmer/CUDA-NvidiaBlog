@@ -3,10 +3,12 @@
 
 ## Contents
 ### 1. An Even Easier Introduction to CUDA
-- To be written...
+- An introduction to CUDA using managed memory
 ### 2. CUDA Pro Tip: Write Flexible Kernels with Grid-Stride Loops
-- To be written...
+- Looking for an optimum thread occupancy
 ### 3. How to Access Global Memory Efficiently in CUDA C/C++ Kernels
-- To be written...
+- Pageable vs. pinned data transfer
+- Batching small transfers
 ### 4. CUDA Pro Tip: Increase Performance with Vectorised Memory Access
-- To be written...
+- Optimising device to device copy
+- Trying to beat ***cudaMemcpyDeviceToDevice***
