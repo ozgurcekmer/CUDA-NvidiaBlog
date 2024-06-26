@@ -20,7 +20,7 @@
 
 * ****CPU*** is a CPU solver using OpenMP threads
 
-- Here's a sample output for GPU sover version 1:
+- Here's a sample output for GPU solver version 1:
 
 <img src="images/Hagi_v0.png" alt="Hagi_version_0" width="600"/>
 
