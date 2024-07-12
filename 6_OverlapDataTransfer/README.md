@@ -96,6 +96,7 @@ void GpuSeqMaxOcc<T>::launchSetup()
 - Total runtimes are 97.763 ms and 65.572 ms for versions 1 and 2, respectively.
 - Stream 14 in Version 1 behaves like a default stream, which causes a stall.
 - In Version 2, we can observe a perfect kernel overlap by all 4 streams. 
+- A kernel overlap wouldn't give us any significant speedup for the reasons mentioned before. Let's try our chance in data transfer overlaps, keeping the problem with Version 1 as a secret for us now.
 
 ### 2. Lack of data transfer overlap
 - The lack of overlapping in data transfer is another problem.
