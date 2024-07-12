@@ -1,5 +1,5 @@
 # How to Overlap Data Transfers in CUDA/C++
-## Accomplished
+## Problem
 - The original NVIDIA blog is [here](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/).
 - A personal laptop, ***Hagi***, with NVIDIA GeForce RTX 2070 with Max-Q Design is used for the simulations (with Windows & Microsoft Visual Studio solution).
 - Codes are developed in object oriented fashion.
@@ -38,7 +38,27 @@
 
 <img src="images/Version2-Initial.png" alt="Hagi_InitialVersion_2" width="600"/>
 
-## To do
+## Solution & Optimisation
+### 1. Lack of kernel overlap
+- The reason that the kernels don't overlap is the fact that each stream already saturates the GPU in terms of computation. Problem size is big, and our streams already use enough threads and then the kernels don't overlap. 
+- In addition, since a kernel execution by a single stream already saturates the GPU computation, using multistreams wouldn't give us a speedup even if they overlap. 
+- Let's check this and try to see a kernel overlap. 
+- As the first job, let's check the properties of the device that we are using by building and running ***deviceQuery*** on **Hagi**. Here is the results:
+
+<img src="images/DeviceQuery.png" alt="Device Query" width="600"/>
+
+- The items we need to focus for now are the followings:
+```
+1. Concurrent copy and kernel execution         : Yes with 6 copy engines
+2. Maximum number of threads per multiprocessor : 1024
+```
+
+- From Item 1, we can conclude that the problem is not the hardware, since concurrency is supported, and there are 6 copy engines available.
+- Let's start to modify our GPU solvers using [flexible kernels with grid-stride loops](https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/) in the light of Item 2.
+
+### 2. Lack of data transfer overlap
+- On the other hand, the lack of overlapping in data transfer is a problem.
+
 - Try to resolve the problem with the result for the current hardware.
 - Build CUDA Samples and run deviceQuery.
 - Try another system (Setonix and one more NVIDIA card)
