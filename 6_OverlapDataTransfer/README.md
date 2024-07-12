@@ -1,10 +1,10 @@
 # How to Overlap Data Transfers in CUDA/C++
 ## Problem
-- The original NVIDIA blog is [here](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/).
+- The original NVIDIA blog by [Mark Harris](https://developer.nvidia.com/blog/author/mharris/) is [here](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/).
 - A personal laptop, ***Hagi***, with NVIDIA GeForce RTX 2070 with Max-Q Design is used for the simulations (with Windows & Microsoft Visual Studio solution).
 - Codes are developed in object oriented fashion.
 - Pinned vectors are created by modifying ***std::vector***s.
-- The problem size was set to ~4M (1 << 22) at the beginning.
+- The problem size was set to ~4M (1 << 22) in the beginning.
 - 4 CUDA streams are used
 - The following flag is used while compiling:
 ```
@@ -96,11 +96,11 @@ void GpuSeqMaxOcc<T>::launchSetup()
 - Total runtimes are 97.763 ms and 65.572 ms for versions 1 and 2, respectively.
 - Stream 14 in Version 1 behaves like a default stream, which causes a stall.
 - In Version 2, we can observe a perfect kernel overlap by all 4 streams. 
-- A kernel overlap wouldn't give us any significant speedup for the reasons mentioned before. Let's try our chance in data transfer overlaps, keeping the problem with Version 1 as a secret for us now.
+- A kernel overlap wouldn't give us any significant speedup for the reasons mentioned above. Let's try our chance in data transfer overlaps, keeping the problem with Version 1 as a secret for us now.
 
 ### 2. Lack of data transfer overlap
 - The lack of overlapping in data transfer is another problem.
 - As we see in Item 1 of the output of ***deviceQuery***, there are 6 copy engines. 
 - The problem is not the hardware, then.
-- The cause of the problem is WDDM.
+- The cause of the problem is the driver mode: WDDM (Windows Display Driver Model).
 
