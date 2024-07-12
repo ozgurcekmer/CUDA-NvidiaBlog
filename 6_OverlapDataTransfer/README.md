@@ -55,10 +55,51 @@
 
 - From Item 1, we can conclude that the problem is not the hardware, since concurrency is supported, and there are 6 copy engines available.
 - Let's start to modify our GPU solvers using [flexible kernels with grid-stride loops](https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/) in the light of Item 2.
+- 256 threads are used in a block.
+- A new sequential GPU solver is developed with an optimal launch configuration for maximum thread occupancy in an SM.
+- To determine the number of blocks in a grid, a kernel launch class member function is developed as below:
+```
+template<typename T>
+void GpuSeqMaxOcc<T>::launchSetup()
+{
+  int devID;
+  int numSMs;
+  gpuGetDevice(&devID);
+
+  cudaDeviceProp properties;
+  cudaGetDeviceProperties(&properties, devID);
+  int maxThreadsPerSM = properties.maxThreadsPerMultiProcessor;
+
+  gpuDeviceGetAttribute(&numSMs, gpuDevAttrMultiProcessorCount, devID);
+  auto blocksPerSM = maxThreadsPerSM / BLOCK_SIZE;
+  std::cout << "There are " << numSMs << " SMs in this device." << std::endl;
+  std::cout << "Max number of threads per SM: " << maxThreadsPerSM << endl;
+  std::cout << "Block Size: " << BLOCK_SIZE << std::endl;
+  std::cout << "Blocks per SM (maxThreadsPerSM / BLOCK_SIZE): " << blocksPerSM << std::endl;
+
+  gridSize = blocksPerSM * numSMs;
+  std::cout << "Grid Size (BlocksPerSM * numSMs) : " << gridSize << std::endl;
+}
+```
+
+- Here is a sample output with sequential and the new sequential GPU solvers:
+
+<img src="images/SeqMaxOcc.png" alt="Sequential Max Occupancy" width="600"/>
+
+- The difference between the runtimes of the newly created and previous sequential GPU solvers is negligible.
+- After using this new configuration to our multi-stream versions, we get the following timelines for the Version 1 and Version 2, respectively:
+
+<img src="images/Version1-kernelOverlap.png" alt="Version 1 Max Occupancy" width="600"/>
+
+<img src="images/Version2-kernelOverlap.png" alt="Version 2 Max Occupancy" width="600"/>
+
+- Total runtimes are 97.763 ms and 65.572 ms for versions 1 and 2, respectively.
+- Stream 14 in Version 1 behaves like a default stream, which causes a stall.
+- In Version 2, we can observe a perfect kernel overlap by all 4 streams. 
 
 ### 2. Lack of data transfer overlap
-- On the other hand, the lack of overlapping in data transfer is a problem.
+- The lack of overlapping in data transfer is another problem.
+- As we see in Item 1 of the output of ***deviceQuery***, there are 6 copy engines. 
+- The problem is not the hardware, then.
+- The cause of the problem is WDDM.
 
-- Try to resolve the problem with the result for the current hardware.
-- Build CUDA Samples and run deviceQuery.
-- Try another system (Setonix and one more NVIDIA card)
