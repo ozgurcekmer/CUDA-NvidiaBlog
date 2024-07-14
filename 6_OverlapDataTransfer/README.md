@@ -64,13 +64,13 @@ void GpuSeqMaxOcc<T>::launchSetup()
 {
   int devID;
   int numSMs;
-  gpuGetDevice(&devID);
+  cudaGetDevice(&devID);
 
   cudaDeviceProp properties;
   cudaGetDeviceProperties(&properties, devID);
   int maxThreadsPerSM = properties.maxThreadsPerMultiProcessor;
 
-  gpuDeviceGetAttribute(&numSMs, gpuDevAttrMultiProcessorCount, devID);
+  cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, devID);
   auto blocksPerSM = maxThreadsPerSM / BLOCK_SIZE;
   std::cout << "There are " << numSMs << " SMs in this device." << std::endl;
   std::cout << "Max number of threads per SM: " << maxThreadsPerSM << endl;
@@ -103,4 +103,40 @@ void GpuSeqMaxOcc<T>::launchSetup()
 - As we see in Item 1 of the output of ***deviceQuery***, there are 6 copy engines. 
 - The problem is not the hardware, then.
 - The cause of the problem is the driver mode: WDDM (Windows Display Driver Model).
+- Please, read Robert Crovella's [respond about this issue](https://stackoverflow.com/questions/19944429/cuda-performance-penalty-when-running-in-windows#:~:text=The%20best%20solution%20under%20windows%20is%20to%20switch,Quadro%20family%20of%20GPUs%20--%20i.e.%20not%20GeForce.).
 
+- In Tesla GPUs and some of the Quadro GPUs, the operating mode can be changed to TCC from WDDM using the following:
+```
+nvidia-smi -i 0 -dm TCC
+```
+- In GeForce GPUs, the WDDM command queue should be flushed manually, and one of the best solutions is using ***cudaStreamQuery(stream)***:
+```
+for (int i = 0; i < N_STREAMS; ++i)
+{
+    int offset = i * STREAM_SIZE;
+    copyH2D(offset, stream[i]);
+    gpuVersion1 << < GRID_SIZE/N_STREAMS, BLOCK_SIZE, 0, stream[i] >> > (dA, offset);
+    copyD2H(offset, stream[i]);
+    cudaStreamQuery(stream[i]);
+}
+```
+- Now, we have the following for Version 1 without maximum thread occupancy modification:
+
+<img src="images/Version1-Final.png" alt="Version 1 Final" width="600"/>
+
+- Runtime has reduced to **45.302 ms**, which is **4.82** and **1.55** times faster than the CPU version and the fastest former GPU version, respectively.
+- There is still no overlap while the first stream transfers data from host to device and eexecutes the kernel. The first overlap is observed when the first kernel transfers data from device to host.
+- No data transfer overlap is achieved in Version 2. 
+- Final runtimes are tabulated as follows:
+
+| Solver | Total Runtime (ms) | 
+| --- | ---: | 
+| CPU* | 218.375 | 
+| GPU Sequential | 70.615 |
+| GPU Version 1 | 45.302 | 
+| GPU Version 2 | 70.252 | 
+
+## Future Work
+- Find a Linux machine and try the codes
+- Use Setonix to figure out the things in AMD side.
+- Can anything be done about the lack of overlap before the data transfer of the first stream from device to host?
