@@ -85,11 +85,9 @@ void GpuV2MaxOcc<T>::solver()
 
     // Stream setup
     gpuEvent_t startEvent, stopEvent;
-    //gpuEvent_t dummyEvent;
     gpuStream_t stream[N_STREAMS];
     gpuEventCreate(&startEvent);
     gpuEventCreate(&stopEvent);
-    //gpuEventCreate(&dummyEvent);
     gpuCheckErrors("event create failure");
 
     for (int i = 0; i < N_STREAMS; ++i)
@@ -98,8 +96,6 @@ void GpuV2MaxOcc<T>::solver()
         gpuCheckErrors("stream create failure");
     }
 
-    //cout << "Grid size: " << GRID_SIZE << ", Block size: " << BLOCK_SIZE << endl;
-
     // VERSION 2 algorithm
     gpuEventRecord(startEvent, 0);
     gpuCheckErrors("event record failure");
@@ -107,7 +103,6 @@ void GpuV2MaxOcc<T>::solver()
     {
         int offset = i * STREAM_SIZE;
         copyH2D(offset, stream[i]);
-        gpuStreamQuery(stream[i]);
     }
     for (int i = 0; i < N_STREAMS; ++i)
     {
@@ -119,13 +114,10 @@ void GpuV2MaxOcc<T>::solver()
     {
         int offset = i * STREAM_SIZE;
         copyD2H(offset, stream[i]);
-        gpuStreamQuery(stream[i]);
     }
 
-    //gpuEventRecord(dummyEvent, 0);
     gpuEventRecord(stopEvent, 0);
     gpuCheckErrors("event record failure");
-    //gpuEventSynchronize(dummyEvent);
     gpuEventSynchronize(stopEvent);
     gpuCheckErrors("event sync failure");
     gpuEventElapsedTime(&ms, startEvent, stopEvent);
@@ -135,7 +127,6 @@ void GpuV2MaxOcc<T>::solver()
     // Cleanup
     gpuEventDestroy(startEvent);
     gpuEventDestroy(stopEvent);
-    //gpuEventDestroy(dummyEvent);
     for (int i = 0; i < N_STREAMS; ++i)
     {
         gpuStreamDestroy(stream[i]);

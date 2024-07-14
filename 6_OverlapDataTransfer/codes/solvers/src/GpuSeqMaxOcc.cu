@@ -85,7 +85,6 @@ void GpuSeqMaxOcc<T>::solver()
     gpuEvent_t startEvent, stopEvent;
     gpuEventCreate(&startEvent);
     gpuEventCreate(&stopEvent);
-    //gpuEventCreate(&dummyEvent);
     gpuCheckErrors("event create failure");
 
     gpuEventRecord(startEvent, 0);
@@ -107,8 +106,6 @@ void GpuSeqMaxOcc<T>::solver()
     // Cleanup
     gpuEventDestroy(startEvent);
     gpuEventDestroy(stopEvent);
-
-
 }
 
 template void GpuSeqMaxOcc<float>::solver();

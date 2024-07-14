@@ -52,13 +52,12 @@ void GpuSequential<T>::solver()
     gpuEvent_t startEvent, stopEvent;
     gpuEventCreate(&startEvent);
     gpuEventCreate(&stopEvent);
-    //gpuEventCreate(&dummyEvent);
     gpuCheckErrors("event create failure");
 
     gpuEventRecord(startEvent, 0);
     gpuCheckErrors("event record failure");
     copyH2D();
-    //launchSetup();
+
     int offset = 0;
     gpuSequential<T> << < GRID_SIZE, BLOCK_SIZE >> > (dA, offset);
     gpuCheckErrors("gpu kernel launch failure");
@@ -75,7 +74,6 @@ void GpuSequential<T>::solver()
     // Cleanup
     gpuEventDestroy(startEvent);
     gpuEventDestroy(stopEvent);
-
 
 }
 
