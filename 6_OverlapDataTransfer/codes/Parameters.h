@@ -17,7 +17,7 @@ typedef float Real;
 */
 
 // Vector dimension
-const size_t N = 1 << 22;
+const size_t N = 1 << 25;
 //const size_t N = 72 * 1024;
 
 // Kernel launch parameters
@@ -28,8 +28,8 @@ static const size_t GRID_SIZE = static_cast<size_t>(std::ceil(static_cast<float>
 static const int N_STREAMS = 4;
 
 // Solver selection
-static const std::string refSolverName = "gpuVersion1";
-static const std::string testSolverName = "gpuVersion2";
+static const std::string refSolverName = "gpuVersion2";
+static const std::string testSolverName = "gpuV2MaxOcc";
 /*
     SOLVERS:
     CPU Solvers:
@@ -37,8 +37,11 @@ static const std::string testSolverName = "gpuVersion2";
   
     GPU Solvers:
     - gpuSequential: Classic data transfer
+    - gpuSeqMaxOcc: Using a grid-stride loop - targeting max thread occupancy
     - gpuVersion1: Loop over all the operations for each chunk of data
     - gpuVersion2: Batch similar operations together
+    - gpuV1MaxOcc: Modified Version 1 - Using a grid-stride loop - targeting max thread occupancy
+    - gpuV2MaxOcc: Modified Version 2 - Using a grid-stride loop - targeting max thread occupancy
 
     WARNING: All GPU solvers need to have the letters "gpu"
     (in this order & lower case) in their names

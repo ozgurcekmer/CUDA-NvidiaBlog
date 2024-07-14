@@ -17,6 +17,7 @@
 #endif
 
 #if defined(USEHIP)
+#define gpuStreamQuery hipStreamQuery
 #define gpuMalloc hipMalloc
 #define gpuHostMalloc hipMallocHost
 #define gpuMallocHost hipHostMalloc
@@ -60,6 +61,8 @@
 #define fullMask 0xFFFFFFFFFFFFFFFFU
 
 #elif defined(USECUDA)
+//#define gpuStream_t ((cudaStream_t)0x2)
+#define gpuStreamQuery cudaStreamQuery
 #define gpuMalloc cudaMalloc
 #define gpuMallocHost cudaMallocHost
 #define gpuMallocManaged cudaMallocManaged

@@ -78,7 +78,7 @@ int main()
     maximumError.maxError(aTest, aResult);
 
     cout << "\nRuntimes: " << endl;
-    cout << std::setprecision(2) << std::fixed;
+    cout << std::setprecision(3) << std::fixed;
     cout << std::left << std::setw(20) << refSolverName << ": " << runtimeRef << " ms." << endl;
     cout << std::left << std::setw(20) << testSolverName << ": " << runtimeTest << " ms." << endl;
     cout << std::left << std::setw(20) << "Speedup" << ": " << runtimeRef / runtimeTest << endl;

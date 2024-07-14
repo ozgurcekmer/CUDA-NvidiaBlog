@@ -37,25 +37,6 @@ void GpuSequential<T>::copyD2H()
     gpuCheckErrors("gpuMemcpy D2H failure");
 }
 
-/*
-template<typename T>
-void GpuSequential<T>::launchSetup()
-{
-    auto blocksPerSM = 2048 / BLOCK_SIZE;
-    int devID;
-    int numSMs;
-    gpuGetDevice(&devID);
-
-    gpuDeviceGetAttribute(&numSMs, gpuDevAttrMultiProcessorCount, devID);
-    std::cout << "There are " << numSMs << " SMs in this device." << std::endl;
-    std::cout << "Blocks per SM: " << blocksPerSM << std::endl;
-
-    gridSize = blocksPerSM * numSMs;
-    std::cout << "Grid Size: " << gridSize << std::endl;
-    std::cout << "Block Size: " << BLOCK_SIZE << std::endl;
-}
-*/
-
 template<typename T>
 GpuSequential<T>::~GpuSequential()
 {
@@ -66,18 +47,36 @@ GpuSequential<T>::~GpuSequential()
 template <typename T>
 void GpuSequential<T>::solver()
 {
-    int device;
-    gpuGetDevice(&device);
-    gpuDeviceProp_t devProp;
-    gpuGetDeviceProperties(&devProp, device);
     deviceAllocations();
+
+    gpuEvent_t startEvent, stopEvent;
+    gpuEventCreate(&startEvent);
+    gpuEventCreate(&stopEvent);
+    //gpuEventCreate(&dummyEvent);
+    gpuCheckErrors("event create failure");
+
+    gpuEventRecord(startEvent, 0);
+    gpuCheckErrors("event record failure");
     copyH2D();
     //launchSetup();
     int offset = 0;
     gpuSequential<T> << < GRID_SIZE, BLOCK_SIZE >> > (dA, offset);
     gpuCheckErrors("gpu kernel launch failure");
-    
     copyD2H();
+    gpuEventRecord(stopEvent, 0);
+    gpuCheckErrors("event record failure");
+    
+    gpuEventSynchronize(stopEvent);
+    gpuCheckErrors("event sync failure");
+    gpuEventElapsedTime(&ms, startEvent, stopEvent);
+    gpuCheckErrors("event elapsed time failure");
+    cout << "Sequential version passed time in ms: " << ms << endl;
+    
+    // Cleanup
+    gpuEventDestroy(startEvent);
+    gpuEventDestroy(stopEvent);
+
+
 }
 
 template void GpuSequential<float>::solver();

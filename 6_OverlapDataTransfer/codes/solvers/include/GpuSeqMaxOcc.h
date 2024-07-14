@@ -7,24 +7,24 @@
 #include <iostream>
 
 template <typename T>
-class GpuSequential : public ISolver<T>
+class GpuSeqMaxOcc : public ISolver<T>
 {
 private:
     T* dA;
 
     const size_t SIZE = N * sizeof(T);
     float ms = 0.0;
- //   size_t gridSize;
-    
+    size_t gridSize;
+
     void deviceAllocations();
     void copyH2D();
     void copyD2H();
- //   void launchSetup();
+    void launchSetup();
 
 public:
-    GpuSequential(Vector::pinnedVector<T>& a) : ISolver<T>(a) {}
+    GpuSeqMaxOcc(Vector::pinnedVector<T>& a) : ISolver<T>(a) {}
 
-    virtual ~GpuSequential();
+    virtual ~GpuSeqMaxOcc();
 
     void solver() override;
 };
