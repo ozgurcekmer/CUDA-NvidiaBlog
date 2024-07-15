@@ -3,16 +3,10 @@
 #include <vector>
 #include <complex>
 
-#include "GpuCommon.h"
+#include "../GpuCommon.h"
 
-#include <cuda_runtime.h>
-#include <cuda_runtime_api.h>
-#include <device_launch_parameters.h>
-
-namespace Vectors
+namespace Vector
 {
-
-
     template <typename T>
     class managedAlloc
     {
@@ -29,12 +23,12 @@ namespace Vectors
         auto allocate(size_type n, const void* = 0) -> value_type*
         {
             value_type* tmp;
-            auto error = cudaMallocManaged((void**)&tmp, n * sizeof(T));
-            if (error != cudaSuccess)
+            auto error = gpuMallocManaged((void**)&tmp, n * sizeof(T));
+            if (error != gpuSuccess)
             {
                 throw std::runtime_error
                 {
-                    cudaGetErrorString(error)
+                    gpuGetErrorString(error)
                 };
             }
             return tmp;
@@ -44,15 +38,16 @@ namespace Vectors
         {
             if (p)
             {
-                auto error = cudaFree(p);
-                if (error != cudaSuccess)
+                auto error = gpuFree(p);
+                if (error != gpuSuccess)
                 {
                     throw std::runtime_error
                     {
-                        cudaGetErrorString(error)
+                        gpuGetErrorString(error)
                     };
                 }
             }
+            
         }
     };
 

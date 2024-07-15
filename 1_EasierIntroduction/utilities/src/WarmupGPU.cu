@@ -1,4 +1,4 @@
-#include "WarmupGPU.h"
+#include "../include/WarmupGPU.h"
 
 using std::vector;
 using std::cout;
@@ -51,4 +51,17 @@ void WarmupGPU::warmup() const
 	gpuFree(dA);
 	gpuFree(dB);
 	gpuFree(dC);
+}
+
+void WarmupGPU::setup(bool& refGPU, bool& testGPU)
+{
+	std::string patternGpu("gpu");
+
+	// GPU solver names should have the letters "gpu"
+	patternGpu = "[[:alpha:]]*" + patternGpu + "[[:alpha:]]*";
+	std::regex rGpu(patternGpu);
+	std::smatch resultsGpu;
+
+	refGPU = std::regex_search(refSolverName, resultsGpu, rGpu);
+	testGPU = std::regex_search(testSolverName, resultsGpu, rGpu);
 }

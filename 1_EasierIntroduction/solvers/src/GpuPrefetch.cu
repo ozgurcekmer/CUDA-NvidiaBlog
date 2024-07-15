@@ -1,4 +1,4 @@
-#include "../include/VectorAddGPU.h"
+#include "../include/GpuPrefetch.h"
 
 using std::cout;
 using std::endl;
@@ -6,7 +6,7 @@ using std::vector;
 
 template <typename T>
 __global__
-void gpuVectorAdd(const T* a, const T* b, T* c, int N) 
+void gpuVectorAddPrefetch(const T* a, const T* b, T* c, int N)
 {
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
     const int STRIDE = blockDim.x * gridDim.x;
@@ -20,7 +20,7 @@ void gpuVectorAdd(const T* a, const T* b, T* c, int N)
 }
 
 template<typename T>
-void VectorAddGPU<T>::launchSetup()
+void GpuPrefetch<T>::launchSetup()
 {
     int devID;
     int numSMs;
@@ -41,20 +41,28 @@ void VectorAddGPU<T>::launchSetup()
     std::cout << "Grid Size (BlocksPerSM * numSMs) : " << gridSize << std::endl;
 }
 
-template <typename T>
-void VectorAddGPU<T>::vectorAdd()
+template<typename T>
+void GpuPrefetch<T>::prefetch()
 {
-    launchSetup();
-    gridSize *= 32;
-    //gridSize = 1;
-    cout << "Launch configuration: (" << gridSize << ", " << BLOCK_SIZE << ")" << endl;
-    gpuVectorAdd << < gridSize, BLOCK_SIZE >> > (a.data(), b.data(), c.data(), N);
-    gpuCheckErrors("gpu kernel launch failure");
-    gpuDeviceSynchronize();
-    gpuCheckErrors("gpu device sync failure");
+    int device = -1;
+    gpuGetDevice(&device);
+    gpuMemPrefetchAsync(a.data(), SIZE, device, NULL);
+    gpuMemPrefetchAsync(b.data(), SIZE * sizeof(T), device, NULL);
+    gpuMemPrefetchAsync(c.data(), SIZE * sizeof(T), device, NULL);
 }
 
-template void VectorAddGPU<float>::vectorAdd();
-template void VectorAddGPU<double>::vectorAdd();
-template VectorAddGPU<float>::~VectorAddGPU();
-template VectorAddGPU<double>::~VectorAddGPU();
+template <typename T>
+void GpuPrefetch<T>::vectorAdd()
+{
+    launchSetup();
+    prefetch();
+    gpuVectorAddPrefetch << < gridSize, BLOCK_SIZE >> > (a.data(), b.data(), c.data(), N);
+    gpuCheckErrors("gpu kernel launch failure");
+    gpuDeviceSynchronize();
+    gpuCheckErrors("gpu device sync failure"); 
+}
+
+template void GpuPrefetch<float>::vectorAdd();
+template void GpuPrefetch<double>::vectorAdd();
+template GpuPrefetch<float>::~GpuPrefetch();
+template GpuPrefetch<double>::~GpuPrefetch();
