@@ -1,5 +1,5 @@
-# CUDA-NvidiaBlog
-- This personal repo includes my object-oriented CUDA/C++ solutions and performance analysis for the sample problems of NVIDIA's brilliant developer blog starting from [an easier introduction to CUDA/C++](https://developer.nvidia.com/blog/even-easier-introduction-cuda/). 
+# CUDA-NvidiaBlog Solutions
+- This personal repo includes my object-oriented CUDA/C++ solutions and performance analysis for the sample problems of NVIDIA's brilliant developer blog, starting from [an easier introduction to CUDA/C++](https://developer.nvidia.com/blog/even-easier-introduction-cuda/). 
 
 
 ## Contents
