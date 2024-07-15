@@ -46,8 +46,8 @@ void VectorAddGPU<T>::launchSetup()
 | CUDA (2304, 256) | 2.09 | 192.35 | 98.16
 | CUDA (4608, 256) | 2.06 | 195.45 | 98.00
 | CUDA (36, 1024)* | 2.13 | 189.47 | 99.56
-| CUDA (72, 1024)* | 2.11 | 190.79 | 99.05
-| CUDA (1152, 1024)* | 2.14 | 192.36 | 97.95
+| CUDA (72, 1024) | 2.11 | 190.79 | 99.05
+| CUDA (1152, 1024) | 2.14 | 192.36 | 97.95
 
 * ****CPU*** is a CPU solver using OpenMP threads
 * \* ***144 * 256*** (or ***36 * 1024***) is the maximum thread capacity of the current GPU extracted by the kernel function ***launchSetup()***
