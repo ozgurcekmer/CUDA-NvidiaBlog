@@ -1,8 +1,8 @@
 # CUDA-NvidiaBlog
-- This personal repo includes my object-oriented CUDA/C++ codes for the sample problems of NVIDIA's CUDA blog. 
+- This personal repo includes my object-oriented CUDA/C++ solutions and performance analysis for the sample problems of NVIDIA's brilliant developer blog starting from [an easier introduction to CUDA/C++](https://developer.nvidia.com/blog/even-easier-introduction-cuda/). 
+
 
 ## Contents
-
 ### 1. An Even Easier Introduction to CUDA
 - An introduction to CUDA using managed memory
 
@@ -17,8 +17,5 @@
 - Optimising device to device copy
 - Trying to beat ***cudaMemcpyDeviceToDevice***
 
-### 5. Unified Memory for CUDA Beginners
-- A simpler programming and memory model
-
-### 6. How to Overlap Data Transfers in CUDA/C++
+### 5. How to Overlap Data Transfers in CUDA/C++
 - Overlapping data transfers and kernels using streams
