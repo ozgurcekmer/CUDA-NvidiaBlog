@@ -3,7 +3,7 @@
 - The original NVIDIA blog by [Mark Harris](https://developer.nvidia.com/blog/author/mharris/) is [here](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/).
 - A personal laptop, ***Hagi***, with NVIDIA GeForce RTX 2070 with Max-Q Design is used for the simulations (with Windows & Microsoft Visual Studio solution).
 - Codes are developed in object oriented fashion.
-- Pinned vectors are created by modifying ***std::vector***s.
+- ***Pinned*** vectors are created by modifying ***std::vector***s.
 - The problem size was set to ~4M (1 << 22) in the beginning.
 - 4 CUDA streams are used
 - The following flag is used while compiling:
