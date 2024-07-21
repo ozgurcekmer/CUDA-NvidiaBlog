@@ -1,0 +1,23 @@
+// Solver interface 
+#pragma once
+
+#include "../../Parameters.h"
+#include "../../utilities/include/vectors/PinnedVector.h"
+
+#include <vector>
+#include <iostream>
+
+template <typename T>
+class ISolver
+{
+protected:
+    std::vector<T>& v;
+    std::vector<T>& A;
+    std::vector<T>& y;
+        
+public:
+    ISolver(std::vector<T>& v, std::vector<T>& A, std::vector<T>& y) : v{ v }, A{ A }, y { y } {}
+    virtual ~ISolver() {}
+    virtual void solver() = 0;
+};
+
