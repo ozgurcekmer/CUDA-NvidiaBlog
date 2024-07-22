@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <iostream>
-#include <omp.h>
 
 template <typename T>
 class CpuSolver : public ISolver<T>

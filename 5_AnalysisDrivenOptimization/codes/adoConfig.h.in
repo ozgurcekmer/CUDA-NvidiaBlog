@@ -1,0 +1,3 @@
+// The configured options and settings
+#define ado_VERSION_MAJOR @ado_VERSION_MAJOR@
+#define ado_VERSION_MINOR @ado_VERSION_MINOR@
