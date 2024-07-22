@@ -33,8 +33,9 @@ const size_t N = 1024 * 1024 * CHUNKS;
 */
 
 // Kernel launch parameters
-static const size_t BLOCK_SIZE = 256;
-static const size_t GRID_SIZE = static_cast<size_t>(std::ceil(static_cast<float>(N) / BLOCK_SIZE));
+static const size_t BLOCK_SIZE = L;
+//static const size_t GRID_SIZE = static_cast<size_t>(std::ceil(static_cast<float>(N) / BLOCK_SIZE));
+static const size_t GRID_SIZE = N;
 
 // Other parameters
 typedef float Real;

@@ -10,10 +10,15 @@ template <typename T>
 class GpuSequential : public ISolver<T>
 {
 private:
-    T* dX;
+    T* dV;
+    T* dA;
     T* dY;
+    T* dVavg;
 
-    const size_t BYTES = N * sizeof(T);
+    const size_t BYTES_V = L * M * N * sizeof(T);
+    const size_t BYTES_A = L * L * sizeof(T);
+    const size_t BYTES_Y = L * N * sizeof(T);
+    const size_t BYTES_Vavg = L * sizeof(T);
     
     void deviceAllocations();
     void copyH2D();
