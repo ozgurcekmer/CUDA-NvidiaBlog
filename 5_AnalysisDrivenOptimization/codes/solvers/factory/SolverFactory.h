@@ -5,6 +5,7 @@
 
 #include "../interface/ISolver.h"
 #include "../include/GpuSequential.h"
+#include "../include/CpuOriginal.h"
 #include "../include/CpuSolver.h"
 #include "../../utilities/include/vectors/PinnedVector.h"
 
@@ -31,7 +32,10 @@ public:
 		{
 			solverSelect = std::make_shared<CpuSolver<T>>(v, A, y);
 		}
-		
+		else if (solverType == "cpuOriginal")
+		{
+			solverSelect = std::make_shared<CpuOriginal<T>>(v, A, y);
+		}
 		return solverSelect;
 	}
 

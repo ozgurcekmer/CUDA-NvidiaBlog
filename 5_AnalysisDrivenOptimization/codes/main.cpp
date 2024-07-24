@@ -40,13 +40,13 @@ int main()
     vector<Real> yRef(N * L, 0.0);
     vector<Real> yTest(N * L, 0.0);
     
-    PrintTensor<Real> printTensor;
+    //PrintTensor<Real> printTensor;
 
     RandomVectorGenerator<Real> randomVector;
     randomVector.randomVector(v);
     randomVector.randomVector(A);
-    printTensor.printTensor(v, N, M, L);
-    printTensor.printTensor(A, 1, L, L);
+    //printTensor.printTensor(v, N, M, L);
+    //printTensor.printTensor(A, 1, L, L);
     
     WarmupGPU warmupGPU;
     warmupGPU.setup(refGPU, testGPU);
@@ -65,10 +65,9 @@ int main()
     auto tFin = omp_get_wtime();
     auto runtimeRef = (tFin - tInit) * 1000.0; // in ms
     
-    /*
     // Test solver
     cout << "\nSolver: " << testSolverName << endl;
-    SolverFactory<Real> testSolverFactory(x, yTest);
+    SolverFactory<Real> testSolverFactory(v, A, yTest);
     std::shared_ptr<ISolver<Real>> testSolver = testSolverFactory.getSolver(testSolverName);
     if ((!refGPU) && testGPU)
     {
@@ -88,5 +87,5 @@ int main()
     cout << std::left << std::setw(20) << refSolverName << ": " << runtimeRef << " ms." << endl;
     cout << std::left << std::setw(20) << testSolverName << ": " << runtimeTest << " ms." << endl;
     cout << std::left << std::setw(20) << "Speedup" << ": " << runtimeRef / runtimeTest << endl;
-    */
+    
 }

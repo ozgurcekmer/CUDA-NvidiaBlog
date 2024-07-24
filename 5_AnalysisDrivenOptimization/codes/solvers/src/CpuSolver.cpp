@@ -8,35 +8,43 @@ using std::vector;
 template <typename T>
 void CpuSolver<T>::solver()
 {
-    vector<T> vAvg(N * L, 0.0);
     //PrintTensor<T> printTensor;
-
-    for (auto i = 0; i < N; ++i)
+    int nThreads = omp_get_max_threads();
+    omp_set_num_threads(nThreads);
+    cout << "Working with " << nThreads << " OpenMP threads." << endl;
+#pragma omp parallel
     {
-        // Vector average
-        for (auto k = 0; k < L; ++k)
+        //vector<T> vAvg;
+#pragma omp for schedule(static) 
+//#pragma omp parallel for schedule(static) 
+        for (auto iN = 0; iN < N; ++iN)
         {
-            T temp = 0.0;
-            for (auto j = 0; j < M; ++j)
+            vector<T> vAvg;
+
+            // Vector average
+            for (auto iL = 0; iL < L; ++iL)
             {
-                temp += this->v[i * (M * L) + j * L + k];
+                T temp = 0.0;
+                for (auto iM = 0; iM < M; ++iM)
+                {
+                    temp += this->v[iN * M * L + iL * M + iM];
+                }
+                vAvg.push_back(temp / static_cast<T>(M));
             }
-            vAvg[i * L + k] = temp / static_cast<T>(M);
-        }
-            
-        // Matrix - Vector multiplication
-        for (auto k = 0; k < L; ++k)
-        {
-            T temp = 0.0;
-            for (auto j = 0; j < L; ++j)
+
+            // Matrix - Vector multiplication
+            for (auto iL = 0; iL < L; ++iL)
             {
-                temp += this->A[k * L + j] * vAvg[i * L + j];
+                T temp = 0.0;
+                for (auto jL = 0; jL < L; ++jL)
+                {
+                    temp += this->A[iL * L + jL] * vAvg[jL];
+                }
+                this->y[iL * N + iN] = temp;
             }
-            this->y[i * L + k] = temp;
+            //printTensor.printTensor(vAvg, 1, 1, L);
         }
     }
-    
-    //printTensor.printTensor(vAvg, N, 1, L);
     //printTensor.printTensor(this->y, N, 1, L);
 }
 

@@ -6,27 +6,45 @@ using std::vector;
 
 template <typename T>
 __global__
-void gpuSequential(T* v, T* vAvg, T* A, T* y, const size_t L, const size_t M, const size_t N)
+void gpuSequential(T* __restrict__ v, T* __restrict__ A, T* __restrict__ y)
 {
-    size_t iN = blockIdx.x;
-    size_t iL = threadIdx.x;
+    __shared__ T sMem[L];
 
-    // Vector average
-    T temp = 0.0;
-    for (auto j = 0; j < M; ++j)
-    {
-        temp += v[iN * M * L + j * L + iL];
-    }
-    vAvg[iL] = temp / static_cast<T>(M);
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
 
-    __syncthreads;
-    // Matrix - Vector multiplication
-    temp = 0.0;
-    for (auto j = 0; j < L; ++j)
+    // Iterate over N data sets
+    for (auto k = 0; k < N; ++k)
     {
-        temp += A[iL * L + j] * vAvg[j];
+        T v1 = 0;
+
+        // Vector average
+        for (auto i = 0; i < M; ++i)
+        {
+            v1 += v[k * M * L + idx * M + i];
+        }
+        v1 /= static_cast<T>(M);
+
+        // Matrix - Vector multiplication
+        for (auto i = 0; i < L; ++i)
+        {
+            __syncthreads();
+            sMem[threadIdx.x] = v1 * A[i * L + idx];
+            for (int s = blockDim.x / 2; s > 0; s /= 2)
+            {
+                __syncthreads();
+                if (threadIdx.x < s)
+                {
+                    sMem[threadIdx.x] += sMem[threadIdx.x + s];
+                }
+            }
+            if (threadIdx.x == 0)
+            {
+                y[i * N + k] = sMem[0];
+            }
+        }
+
+
     }
-    y[iN * L + iL] = temp;
 }
 
 template<typename T>
@@ -36,7 +54,6 @@ void GpuSequential<T>::deviceAllocations()
     gpuMalloc(&dV, BYTES_V);
     gpuMalloc(&dA, BYTES_A);
     gpuMalloc(&dY, BYTES_Y);
-    gpuMalloc(&dVavg, BYTES_Vavg);
     gpuCheckErrors("gpuMalloc failure");
 }
 
@@ -62,7 +79,6 @@ GpuSequential<T>::~GpuSequential()
     gpuFree(dV);
     gpuFree(dA);
     gpuFree(dY);
-    gpuFree(dVavg);
     gpuCheckErrors("gpuFree failure");
 }
 
@@ -71,7 +87,7 @@ void GpuSequential<T>::solver()
 {
     deviceAllocations();
     copyH2D();
-    gpuSequential<T> << < GRID_SIZE, BLOCK_SIZE >> > (dV, dVavg, dA, dY, L, M, N);
+    gpuSequential<T> << < GRID_SIZE, BLOCK_SIZE >> > (dV, dA, dY);
     gpuCheckErrors("gpu kernel launch failure");
     copyD2H();
 }

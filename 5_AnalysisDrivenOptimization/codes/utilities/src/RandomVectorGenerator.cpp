@@ -6,6 +6,8 @@ void RandomVectorGenerator<T>::randomVector(std::vector<T>& v) const
     std::random_device rd;
     std::mt19937 randEng(rd());
 
+    //randEng.seed(0);
+
     std::uniform_real_distribution<T> uniNum{0.0, 1.0};
 
     for (auto& i : v)

@@ -7,13 +7,13 @@
 #include <omp.h>
 
 template <typename T>
-class CpuSolver2 : public ISolver<T>
+class CpuOriginal : public ISolver<T>
 {
 private:
-    
-public:
-    CpuSolver2(std::vector<T>& v, std::vector<T>& A, std::vector<T>& y) : ISolver<T>(v, A, y) {}
 
-    virtual ~CpuSolver2() {}
+public:
+    CpuOriginal(std::vector<T>& v, std::vector<T>& A, std::vector<T>& y) : ISolver<T>(v, A, y) {}
+
+    virtual ~CpuOriginal() {}
     void solver() override;
 };
