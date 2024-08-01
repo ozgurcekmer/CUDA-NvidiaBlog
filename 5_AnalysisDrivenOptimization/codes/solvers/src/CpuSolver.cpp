@@ -10,8 +10,9 @@ void CpuSolver<T>::solver()
 {
     //PrintTensor<T> printTensor;
     int nThreads = omp_get_max_threads();
+    //int nThreads = 1;
     omp_set_num_threads(nThreads);
-    cout << "Working with " << nThreads << " OpenMP threads." << endl;
+    cout << "Working with " << nThreads << " OpenMP thread(s)." << endl;
 #pragma omp parallel
     {
         //vector<T> vAvg;

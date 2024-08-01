@@ -13,22 +13,22 @@ void gpuSequential(T* __restrict__ v, T* __restrict__ A, T* __restrict__ y)
     size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
 
     // Iterate over N data sets
-    for (auto k = 0; k < N; ++k)
+    for (auto iN = 0; iN < N; ++iN)
     {
         T v1 = 0;
 
         // Vector average
-        for (auto i = 0; i < M; ++i)
+        for (auto iM = 0; iM < M; ++iM)
         {
-            v1 += v[k * M * L + idx * M + i];
+            v1 += v[iN * M * L + idx * M + iM];
         }
         v1 /= static_cast<T>(M);
 
         // Matrix - Vector multiplication
-        for (auto i = 0; i < L; ++i)
+        for (auto iL = 0; iL < L; ++iL)
         {
             __syncthreads();
-            sMem[threadIdx.x] = v1 * A[i * L + idx];
+            sMem[threadIdx.x] = v1 * A[iL * L + idx];
             for (int s = blockDim.x / 2; s > 0; s /= 2)
             {
                 __syncthreads();
@@ -39,7 +39,7 @@ void gpuSequential(T* __restrict__ v, T* __restrict__ A, T* __restrict__ y)
             }
             if (threadIdx.x == 0)
             {
-                y[i * N + k] = sMem[0];
+                y[iL * N + iN] = sMem[0];
             }
         }
 

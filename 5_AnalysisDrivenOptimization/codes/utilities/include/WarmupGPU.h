@@ -17,7 +17,7 @@
 class WarmupGPU
 {
 private:
-	const size_t N = 1 << 24;
+	const size_t N = 1 << 23;
 
 public:
 	void warmup() const;

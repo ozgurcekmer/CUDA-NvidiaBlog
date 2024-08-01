@@ -69,16 +69,18 @@ int main()
     cout << "\nSolver: " << testSolverName << endl;
     SolverFactory<Real> testSolverFactory(v, A, yTest);
     std::shared_ptr<ISolver<Real>> testSolver = testSolverFactory.getSolver(testSolverName);
+    
     if ((!refGPU) && testGPU)
     {
         warmupGPU.warmup();
         cout << "Warmup for test solver: " << testSolverName << endl;
     }
+    
     tInit = omp_get_wtime();
     testSolver->solver();
     tFin = omp_get_wtime();
     auto runtimeTest = (tFin - tInit) * 1000.0; // in ms
-
+    
     cout << "\nVerifying the test code" << endl;
     maximumError.maxError(yRef, yTest);
 

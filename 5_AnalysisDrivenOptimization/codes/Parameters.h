@@ -17,15 +17,18 @@
 */
 
 // Vector dimension
-const size_t L = 256;
+const size_t L = 1024;
+//const size_t L = 256;
 //const size_t L = 5;
 
 // Number of vectors in a set
 const size_t M = 1024;
+//const size_t M = 32;
 //const size_t M = 5;
 
 // Number of vector sets
-const size_t N = 512;
+const size_t N = 1024;
+//const size_t N = 32;
 //const size_t N = 5;
 
 /*
@@ -46,7 +49,7 @@ typedef float Real;
 // Solver selection
 //static const std::string refSolverName = "cpuOriginal";
 static const std::string refSolverName = "cpu";
-static const std::string testSolverName = "gpuSequential";
+static const std::string testSolverName = "gpuSolver2";
 /*
     SOLVERS:
     CPU Solvers:
