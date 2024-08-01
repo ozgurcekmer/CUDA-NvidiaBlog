@@ -1,7 +1,7 @@
 # How to Overlap Data Transfers in CUDA/C++
 ## Problem
 - The original NVIDIA blog by [Mark Harris](https://developer.nvidia.com/blog/author/mharris/) is [here](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/).
-- A personal laptop, ***Hagi***, with NVIDIA GeForce RTX 2070 with Max-Q Design is used for the simulations (with Windows & Microsoft Visual Studio solution).
+- A personal laptop, ***Hagi***, with NVIDIA GeForce RTX 2070 with Max-Q Design is used for the simulations (with Windows & Microsoft Visual Studio).
 - Codes are developed in object oriented fashion.
 - ***Pinned*** vectors are created by modifying ***std::vector***s.
 - The problem size was set to ~4M (1 << 22) in the beginning.
