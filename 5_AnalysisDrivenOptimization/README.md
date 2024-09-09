@@ -27,6 +27,7 @@ where:
   - $i_M$: index through the number of vectors in a vector set
   - $i_L$: index through the vector size
 
+- I used $N = M = L = 512$, since using the original size of the problem crashes my laptop when I use nsight-compute.
 - The following is the solver function of the ***CpuSolver*** class:
 ```
 template <typename T>
@@ -70,24 +71,24 @@ void CpuSolver<T>::solver()
 - The following is a sample output comparing two CPU solvers:
 ```
 Nvidia Blog: Analysis-Driven Optimization (ADO)
-Vector Size               : 1024
-Number of vectors         : 1024
-Number of vector sets     : 1024
+Vector Size               : 512
+Number of vectors         : 512
+Number of vector sets     : 512
 
 
 Solver: cpuOriginal
 Working with 12 OpenMP threads.
 
 Solver: cpu
-Working with 12 OpenMP threads.
+Working with 12 OpenMP thread(s).
 
 Verifying the test code
 Maximum Error: 0
 
 Runtimes:
-cpuOriginal         : 4093.473 ms.
-cpu                 : 2209.617 ms.
-Speedup             : 1.853
+cpuOriginal         : 394.944 ms.
+cpu                 : 225.696 ms.
+Speedup             : 1.750
 ```
 - An extra inner for loop inside the vector average loop in the original CPU solver causes the extra runtime.
 - I've continued with ***CpuSolver1*** as the CPU solver at the rest of this work.
@@ -133,23 +134,25 @@ void gpuSolver1(T* __restrict__ v, T* __restrict__ A, T* __restrict__ y)
     }
 }
 ``` 
-- In addition to the changes in indexes (e.g. **iM** instead of **i**, **iN** instead of **k**, etc.), I eliminated the first ***____syncthreads()*** right under the first *for loop* in matrix-vector multiplication.
+- In addition to the changes in indexes (e.g. $i_M$ instead of **i**, $i_N$ instead of **k**, etc.), I eliminated the first ***____syncthreads()*** right under the first *for loop* in matrix-vector multiplication.
 - The GPU solver, which uses this kernel is named ***GpuSolver1***.
 - The solver launches the kernel with the following launch configuration:
 ```
 gpuSolver1<<<1, L>>>(dV, dA, dY);
 ```
-- where:
+- where the following are the device vectors:
   - dV: Input vector system
   - dA: Matrix
   - dY: Output vector system
 
+- A compiler flag, ***-DKERNELTIME***, should be used to utilise a CPU timer to measure only the kernel runtime.
+- The reported runtimes at the end of the output includes the time passed during data transfer between CPU and GPU, and kernel runtime.
 - The following is the performance results of ***GpuSolver1*** against the ***CpuSolver*** with **1** and **12** ***OpenMP threads***, respectively:
 ```
 Nvidia Blog: Analysis-Driven Optimization (ADO)
-Vector Size               : 1024
-Number of vectors         : 1024
-Number of vector sets     : 1024
+Vector Size               : 512
+Number of vectors         : 512
+Number of vector sets     : 512
 
 
 Solver: cpu
@@ -158,21 +161,21 @@ Working with 1 OpenMP thread(s).
 Solver: gpuSolver1
 Verifying warmup launch
 Warmup for test solver: gpuSolver1
-Kernel runtime: 12648.6 ms.
+Kernel runtime: 2717.72 ms.
 
 Verifying the test code
 Maximum Error: 0
 
 Runtimes:
-cpu                 : 11124.422 ms.
-gpuSolver1          : 13729.194 ms.
-Speedup             : 0.810
+cpu                 : 1338.210 ms.
+gpuSolver1          : 2853.665 ms.
+Speedup             : 0.469
 ``` 
 ```
 Nvidia Blog: Analysis-Driven Optimization (ADO)
-Vector Size               : 1024
-Number of vectors         : 1024
-Number of vector sets     : 1024
+Vector Size               : 512
+Number of vectors         : 512
+Number of vector sets     : 512
 
 
 Solver: cpu
@@ -181,33 +184,33 @@ Working with 12 OpenMP thread(s).
 Solver: gpuSolver1
 Verifying warmup launch
 Warmup for test solver: gpuSolver1
-Kernel runtime: 12700 ms.
+Kernel runtime: 2714.74 ms.
 
 Verifying the test code
 Maximum Error: 0
 
 Runtimes:
-cpu                 : 1903.378 ms.
-gpuSolver1          : 13815.614 ms.
-Speedup             : 0.138
+cpu                 : 216.025 ms.
+gpuSolver1          : 2841.109 ms.
+Speedup             : 0.076
 ```
-- In my laptop, ***Hagi***, the ***CpuSolver*** with a single thread and ***GpuSolver1*** have similar runtimes.
-- When I use all CPU cores, ***CpuSolver*** runs about 7.3 times faster than ***GpuSolver1***, including data transfers between CPU and GPU, and the kernel runtime.
+- In my laptop, ***Hagi***, the ***CpuSolver*** with a single thread runs about 2 times faster than ***GpuSolver1***.
+- When I use all available CPU cores, ***CpuSolver*** runs about 12.6 times faster than ***GpuSolver1*** kernel.
 - Here is the results summary:
 
 | Solver | Kernel runtime (ms) | Total runtime (ms) |
 | --- | ---: | ---: |
-| Cpu (1 thread) | 11124.4 | |
-| Cpu (12 threads) | 1903.4 | |
-| GpuSolver1 | 12700.0 | 13815.6 |
+| Cpu (1 thread) | 1338.2 | |
+| Cpu (12 threads) | 216.0 | |
+| GpuSolver1 | 2714.7 | 2841.1 |
 
 ### Profiling ***GpuSolver1***
 - NVIDIA Nsight Compute 2024.2.1.0 was used to profile the kernels.
 - The following problem parameters were used initially:
-  - **N = 1024**
-  - **M = 1024**
-  - **L = 1024**
-- Profiling ***gpuSolver1_kernel*** using these parameters crashed my system, and system restarted. Hence I set the parameters as follows (after crashing ***Hagi*** a few more times):
+  - **N = 512**
+  - **M = 512**
+  - **L = 512**
+- Profiling ***gpuSolver1_kernel*** with a single thread block, using these parameters, crashed my system, and system restarted. Hence I set the parameters as follows (after crashing ***Hagi*** a few more times):
   - **N = 32**
   - **M = 32**
   - **L = 256**
@@ -215,7 +218,7 @@ Speedup             : 0.138
 
 <img src="images/GpuSolver1_SoL.png" alt="Initial profile" width="600"/>
 
-- Bootleneck rule is used here to guide our analysis.
+- Bottleneck rule is used here to guide our analysis.
 - I got the small grid warning as expected.
 - Arithmetic Intensity (AI) is 0.05.
 - My kernel is far from both rooflines. Hence, I am not efficiently utilizing the compute and memory resources of the GPU.
@@ -224,7 +227,7 @@ Speedup             : 0.138
 <img src="images/GpuSolver1_LaunchStatistics.png" alt="Initial profile launch statistics" width="600"/>
 
 ### A new GPU solver, ***GpuSolver2***
-- Considering the ***bottleneck***, stated by Nsight Compute, ***GpuSolver1*** should be refactored to develop the new solver, ***GpuSolver2***.
+- Considering the ***bottleneck***, stated by Nsight Compute, ***GpuSolver1*** should be refactored to develop the new solver, ***GpuSolver2***, to utilise a larger grid.
 - In ***GpuSolver2***, **N** data sets are distributed across **N** blocks.
 - Here is the new kernel and the new launch configuration, respectively:
 
@@ -269,12 +272,12 @@ void gpuSolver2(T* __restrict__ v, T* __restrict__ A, T* __restrict__ y)
 ```
 gpuSolver2<<<N, L>>>(dV, dA, dY);
 ```
-- Here is a performance result with ***CpuSolver*** and ***GpuSolver2*** with **N = M = L = 1024**:
+- Here is a performance result with ***CpuSolver*** and ***GpuSolver2*** with **N = M = L = 512**:
 ```
 Nvidia Blog: Analysis-Driven Optimization (ADO)
-Vector Size               : 1024
-Number of vectors         : 1024
-Number of vector sets     : 1024
+Vector Size               : 512
+Number of vectors         : 512
+Number of vector sets     : 512
 
 
 Solver: cpu
@@ -283,35 +286,39 @@ Working with 12 OpenMP thread(s).
 Solver: gpuSolver2
 Verifying warmup launch
 Warmup for test solver: gpuSolver2
-Kernel runtime: 412.397 ms.
+Kernel runtime: 58.703 ms.
 
 Verifying the test code
 Maximum Error: 0
 
 Runtimes:
-cpu                 : 1815.335 ms.
-gpuSolver2          : 1518.872 ms.
-Speedup             : 1.195
+cpu                 : 217.916 ms.
+gpuSolver2          : 188.397 ms.
+Speedup             : 1.157
 ```
 - Here is the updated performance summary:
 
 | Solver | Kernel runtime (ms) | Total runtime (ms) |
 | --- | ---: | ---: |
-| Cpu (1 thread) | 11124.4 | |
-| Cpu (12 threads) | 1903.4 | |
-| GpuSolver1 | 12700.0 | 13815.6 |
-| GpuSolver2 | 412.4 | 1518.9 |
+| Cpu (1 thread) | 1338.2 | |
+| Cpu (12 threads) | 216.0 | |
+| GpuSolver1 | 2714.7 | 2841.1 |
+| GpuSolver2 | 58.7 | 188.397 |
 
+- ***GpuSolver2*** runs 3.7 times faster than CPU solver with multi-threads.
 - The detailed kernel performance by nsight-compute is as follows:
 
-<img src="images/Step1_and_Baseline.png" alt="Step 1 Roofline" width="600"/>
+<img src="images/GpuSolver2_SoL.png" alt="Step 1 Roofline" width="600"/>
 
 - Three cases were profiled here. 
   - **Case 1:** ***GpuSolver1*** with **N = 32**, **M = 32**, and **L = 256**, and with the launch configuration <<<1, 256>>>.
   - **Case 2:** ***GpuSolver2*** with **N = 32**, **M = 32**, and **L = 256**, and with the launch configuration <<<32, 256>>>.
-  - **Case 3:** ***GpuSolver2*** with **N = 1024**, **M = 1024**, and **L = 1024**, and with the launch configuration <<<1024, 1024>>>.
-- Runtimes of **Cases 1** and **2** can be compared here, since the problem size is the same for these two, although we already compared them for a larger problem size using a CPU timer as tabulated above.
+  - **Case 3:** ***GpuSolver2*** with **N = 512**, **M = 512**, and **L = 512**, and with the launch configuration <<<512, 512>>>.
+
+- Runtimes of **Cases 1** and **2** can be compared here, since the problem size is the same for these two, although we already compared them for a *larger problem size* using a CPU timer as tabulated above.
+
 - Here, a 31.8 times faster solver was achieved by refactoring our previous solver, considering nsight-compute's ***small grid*** warning. Since, the problem size is still small, we still see the same warning for **Case 2**.
+
 - **Case 3** is the one with the larger problem size, and comparing the runtime is not meaningful as in the case in the original blog post.
 - The following ***Latency Issue*** warning is received this time:
   - *This kernel exhibits low compute throughput and memory bandwidth utilization relative to the peak performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potential reasons.*
@@ -319,7 +326,7 @@ Speedup             : 1.195
 
 <img src="images/Step1_and_Baseline_schedulerStats.png" alt="Scheduler Statistics - Step 1" width="600"/>
 
-- Summary:
+- **Summary:**
   - A ***Scheduler*** issues instructions via warps.
   - Each scheduler is responsible to issue instructions for a pool of warps.
   - The upper limit of the number of warps in a pool is called ***theoretical warps***, and it's set up by kernel launch configuration.
@@ -332,6 +339,46 @@ Speedup             : 1.195
 - ***Issue Slot Utilization***: *Every scheduler is capable of issuing one instruction per cycle, but for this kernel each scheduler only issues an instruction every 3.2 cycles. This might leave hardware resources underutilized and may lead to less optimal performance. Out of the maximum of 8 warps per scheduler, this kernel allocates an average of 8.02 active warps per scheduler, but only an average of 0.36 warps were eligible per cycle. Eligible warps are the subset of active warps that are ready to issue their next instruction. Every cycle with no eligible warp results in no instruction being issued and the issue slot remains unused. To increase the number of eligible warps, avoid possible load imbalances due to highly different execution durations per warp. Reducing stalls indicated on the Warp State Statistics and Source Counters sections can help, too.*
 - **Diagnosis:**
   - Each scheduler is capable of issuing 1 warp per cycle, but the achieved number is 1 instruction in 3.2 cycles.
-  - We have 8 warps per scheduler, but only ***0.36*** warps were ***eligible*** per cycle.
+  - We have 8 warps per scheduler, but only ***0.36*** warps are ***eligible*** per cycle.
 - **Cure:**
   - Avoid possible load imbalances due to highly different execution durations per warp.
+  - An ***estimated speedup*** after fixing this is **54.04%**.
+- Let's check also the ***warp state statistics***:
+
+<img src="images/Step1_and_Baseline_warpStateStats.png" alt="Warp State Statistics - Step 1" width="600"/>
+
+- **Summary**
+  - ***Warp state***: a warp's readiness (or inability) to issue its next instruction.
+  - ***Warp cycles per instruction***: Latency between 2 consecutive instructions.
+  - Higher ***warp cycles per instruction*** means more warp parallelism is required to hide this latency.
+  - ***The number in the chart for each state*** is the average number of cycles spent in that state per issued instruction.
+  - We should focus on a stall when the schedulers fail to issue every cycle.
+- **Diagnosis:**
+  - My results are different than those of the original blog post.
+  - ***Stall Wait*** has the highest number of warp cycles per instruction.
+  - Each warp here in this kernel spends 14.1 cycles being stalled waiting on a fixed latency execution dependency. 
+- **Cure:**
+  - Hide these latencies by:
+    - Increase the number of active warps
+    - Restructure the code
+    - Unroll loops
+  
+    or
+    - Consider switching to lower-latency instructions
+  - **An additional note:**
+    - Total number of cycles between issuing 2 instructions is **25.5** and **55.4%** of this is ***Wait Stall***. 
+- In the ***Source Counters*** tab, another rule is given called ***Uncoalesced Global Accesses***. 
+- ***Uncoalesced Global Accesses***: *This kernel has uncoalesced global accesses resulting in a total of 117440512 excessive sectors (78% of the total 151257088 sectors). Check the L2 Theoretical Sectors Global Excessive table for the primary source locations. The CUDA Programming Guide has additional information on reducing uncoalesced device memory accesses.*
+- When I check the ***L2 Theoretical Sectors Global Excessive*** table, I get the following:
+
+<img src="images/Step1-SourceCounters.png" alt="Source Counters - Step 1" width="600"/>
+
+- All of the ***uncoalesced global access*** is encountered in line 25 of the solver. When I click on that line, I get the following:
+
+<img src="images/Step1-Source.png" alt="Source - Step 1" width="600"/>
+
+- ***Vector average*** part of the code is where all the uncoalesced global access occurs. 
+- The next GPU solver version will address this issue.
+
+### The next GPU solver, ***GpuSolver3***
+- Warp shuffle is implemented to perform vector average.
